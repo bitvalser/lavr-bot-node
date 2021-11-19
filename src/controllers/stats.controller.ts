@@ -1,28 +1,28 @@
 import * as Discord from 'discord.js';
 import { splitFields } from '../helpers/split-fields';
 import { getStatByName, getStats } from '../services/stats.service';
-import { ControllerBase } from './controller.base';
+import { ControllerBase } from '../classes/controller.base';
 
 export class StatsController extends ControllerBase {
   public processMessage(): void {
     const charName = this.args[0];
     switch (charName) {
       case 'список':
-        this.message.channel.startTyping();
+        this.message.channel.sendTyping();
         getStats().then((stats) => {
-          this.message.channel.stopTyping();
           const rich = new Discord.MessageEmbed().setTitle('Список доступных характеристик').setDescription(
             Object.entries(stats)
               .map(([name, { description }]: any) => `- **${name}** - ${description}`)
               .join('\n')
           );
-          this.message.reply(rich);
+          this.message.reply({
+            embeds: [rich],
+          });
         });
         break;
       default:
-        this.message.channel.startTyping();
+        this.message.channel.sendTyping();
         getStatByName(charName).then((stat) => {
-          this.message.channel.stopTyping();
           if (!stat) {
             this.message.reply(`Характеристка с названием ${charName} не найден.`);
             return;
@@ -45,7 +45,9 @@ export class StatsController extends ControllerBase {
             .setTitle(stat.name)
             .addFields(...splitFields(fields))
             .setColor(stat.color);
-          this.message.reply(rich);
+          this.message.reply({
+            embeds: [rich],
+          });
         });
     }
   }

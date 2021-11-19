@@ -9,6 +9,7 @@
     "strict": true,
     "declaration": true,
     "sourceMap": true,
+    "strictNullChecks": false,
     "inlineSources": true,
     "types": ["node"],
     "stripInternal": true

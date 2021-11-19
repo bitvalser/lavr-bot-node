@@ -1,5 +1,5 @@
 import { getCharacterByName } from '../services/character.service';
-import { ControllerBase } from './controller.base';
+import { ControllerBase } from '../classes/controller.base';
 
 export class LevelController extends ControllerBase {
   public processMessage(): void {

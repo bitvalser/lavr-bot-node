@@ -21,7 +21,14 @@ export const botCharactersScripts: {
       .then(() => delaySend(() => message.channel.send('Never gonna make you cry')))
       .then(() => delaySend(() => message.channel.send('Never gonna say goodbye')))
       .then(() => delaySend(() => message.channel.send('Never gonna tell a lie and hurt you')))
-      .then(() => delaySend(() => message.channel.send('Ты попался на рикролл)))', img)));
+      .then(() =>
+        delaySend(() =>
+          message.channel.send({
+            content: 'Ты попался на рикролл)))',
+            embeds: [img],
+          })
+        )
+      );
   },
   'run-river': (message: Message) => {
     delaySend(() => message.channel.send('Я, в своем познании настолько преисполнился'))

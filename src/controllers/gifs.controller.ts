@@ -1,8 +1,9 @@
 import * as Discord from 'discord.js';
 import { getGifs, getGifByName, createGif } from '../services/gifs.service';
-import { ControllerBase } from './controller.base';
+import { ControllerBase } from '../classes/controller.base';
 
-const URL_REGEX = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+const URL_REGEX =
+  /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
 const CREATE_ROLE_WHITELIST = [
   '699101609895919646',
   '701510217715941467',
@@ -18,15 +19,16 @@ export class GifsController extends ControllerBase {
     const gifName = this.args[0];
     switch (gifName) {
       case 'список':
-        this.message.channel.startTyping();
+        this.message.channel.sendTyping();
         getGifs().then((characters) => {
-          this.message.channel.stopTyping();
           const rich = new Discord.MessageEmbed().setTitle('Список доступных гифок').setDescription(
             Object.keys(characters)
               .map((name) => `- ${name.replace(/_/g, '\\_')}`)
               .join('\n')
           );
-          this.message.reply(rich);
+          this.message.reply({
+            embeds: [rich],
+          });
         });
         break;
       case 'добавить':
@@ -46,23 +48,24 @@ export class GifsController extends ControllerBase {
         } else if (!URL_REGEX.test(url)) {
           this.message.reply('Недействительная ссылка предоставлена');
         } else {
-          this.message.channel.startTyping();
+          this.message.channel.sendTyping();
           createGif(name, url).then(() => {
-            this.message.channel.stopTyping();
             this.message.reply(`Гифка с именем ${name} успешно создана!`);
           });
         }
         break;
       default:
-        this.message.channel.startTyping();
+        this.message.channel.sendTyping();
         getGifByName(gifName).then((gif) => {
-          this.message.channel.stopTyping();
           if (!gif) {
             this.message.reply(`Гифка с названием ${gifName} не найдена.`);
             return;
           }
           const attachment = new Discord.MessageAttachment(gif.url);
-          this.message.reply(gif.id, attachment);
+          this.message.reply({
+            content: gif.id,
+            embeds: [attachment],
+          });
           this.message.delete();
         });
     }
