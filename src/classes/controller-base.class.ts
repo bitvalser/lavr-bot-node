@@ -9,5 +9,5 @@ export abstract class ControllerBase {
     this.args = args;
   }
 
-  public abstract processMessage(): void;
+  public abstract processCommand(): void;
 }

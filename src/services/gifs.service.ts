@@ -1,30 +1,41 @@
 import firebase from 'firebase';
 
-export const getGifs = (): Promise<any> => {
-  return firebase
-    .firestore()
-    .collection('gifs')
-    .get()
-    .then((result) =>
-      result.docs.reduce(
-        (acc, val) => ({
-          ...acc,
-          [val.id]: val.data(),
-        }),
-        {}
-      )
-    );
-};
+export class GifsService {
+  private static instance: GifsService;
 
-export const getGifByName = (name: string): Promise<any> => {
-  return firebase
-    .firestore()
-    .collection('gifs')
-    .doc(name)
-    .get()
-    .then((result) => ({ id: result.id, ...result.data() }));
-};
+  public static getInstance(): GifsService {
+    if (!GifsService.instance) {
+      GifsService.instance = new GifsService();
+    }
+    return GifsService.instance;
+  }
 
-export const createGif = (name: string, url: string): Promise<any> => {
-  return firebase.firestore().collection('gifs').doc(name).set({ url });
-};
+  public getGifs(): Promise<any> {
+    return firebase
+      .firestore()
+      .collection('gifs')
+      .get()
+      .then((result) =>
+        result.docs.reduce(
+          (acc, val) => ({
+            ...acc,
+            [val.id]: val.data(),
+          }),
+          {}
+        )
+      );
+  }
+
+  public getGifByName(name: string): Promise<any> {
+    return firebase
+      .firestore()
+      .collection('gifs')
+      .doc(name)
+      .get()
+      .then((result) => ({ id: result.id, ...result.data() }));
+  }
+
+  public createGif(name: string, url: string): Promise<any> {
+    return firebase.firestore().collection('gifs').doc(name).set({ url });
+  }
+}

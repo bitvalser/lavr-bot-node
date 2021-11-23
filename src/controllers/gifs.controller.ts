@@ -1,32 +1,41 @@
 import * as Discord from 'discord.js';
-import { getGifs, getGifByName, createGif } from '../services/gifs.service';
-import { ControllerBase } from './controller.base';
+import { GifsService } from '../services/gifs.service';
+import { ControllerBase } from '../classes/controller-base.class';
+import { Controller } from '../decorators/controller.decorator';
+import { ChannelRole } from '../constants/channel-role.constants';
 
-const URL_REGEX = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+const URL_REGEX =
+  /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
 const CREATE_ROLE_WHITELIST = [
-  '699101609895919646',
-  '701510217715941467',
-  '699102550657466378',
-  '699106829137084506',
-  '699117653968551946',
-  '699103792544743463',
-  '796541702059589653',
+  ChannelRole.Wing,
+  ChannelRole.Editor,
+  ChannelRole.Admin,
+  ChannelRole.Moderator,
+  ChannelRole.Sponsor,
+  ChannelRole.StrongReader,
+  ChannelRole.OldAdmin,
 ];
 
+@Controller({
+  commands: ['гиф', 'gif'],
+})
 export class GifsController extends ControllerBase {
-  public processMessage(): void {
+  private gifsService: GifsService = GifsService.getInstance();
+
+  public processCommand(): void {
     const gifName = this.args[0];
     switch (gifName) {
       case 'список':
-        this.message.channel.startTyping();
-        getGifs().then((characters) => {
-          this.message.channel.stopTyping();
+        this.message.channel.sendTyping();
+        this.gifsService.getGifs().then((characters) => {
           const rich = new Discord.MessageEmbed().setTitle('Список доступных гифок').setDescription(
             Object.keys(characters)
               .map((name) => `- ${name.replace(/_/g, '\\_')}`)
               .join('\n')
           );
-          this.message.reply(rich);
+          this.message.reply({
+            embeds: [rich],
+          });
         });
         break;
       case 'добавить':
@@ -35,7 +44,7 @@ export class GifsController extends ControllerBase {
           break;
         }
         const roleId = this.message.guild?.members.cache.get(this.message.author.id)?.roles.highest.id || '';
-        if (!CREATE_ROLE_WHITELIST.includes(roleId)) {
+        if (!CREATE_ROLE_WHITELIST.includes(roleId as ChannelRole)) {
           this.message.reply('У вас нет прав на добавление гифки');
           break;
         }
@@ -46,23 +55,24 @@ export class GifsController extends ControllerBase {
         } else if (!URL_REGEX.test(url)) {
           this.message.reply('Недействительная ссылка предоставлена');
         } else {
-          this.message.channel.startTyping();
-          createGif(name, url).then(() => {
-            this.message.channel.stopTyping();
+          this.message.channel.sendTyping();
+          this.gifsService.createGif(name, url).then(() => {
             this.message.reply(`Гифка с именем ${name} успешно создана!`);
           });
         }
         break;
       default:
-        this.message.channel.startTyping();
-        getGifByName(gifName).then((gif) => {
-          this.message.channel.stopTyping();
+        this.message.channel.sendTyping();
+        this.gifsService.getGifByName(gifName).then((gif) => {
           if (!gif) {
             this.message.reply(`Гифка с названием ${gifName} не найдена.`);
             return;
           }
           const attachment = new Discord.MessageAttachment(gif.url);
-          this.message.reply(gif.id, attachment);
+          this.message.reply({
+            content: gif.id,
+            files: [attachment],
+          });
           this.message.delete();
         });
     }

@@ -1,17 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es2015",
-    "lib": ["es2015", "dom"],
-    "rootDir": "src",
-    "outDir": "dist",
     "module": "commonjs",
+    "esModuleInterop": true,
+    "target": "es2018",
     "moduleResolution": "node",
-    "strict": true,
-    "declaration": true,
-    "sourceMap": true,
-    "inlineSources": true,
-    "types": ["node"],
-    "stripInternal": true
+    "sourceMap": false,
+    "emitDecoratorMetadata": true,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "outDir": "dist"
   },
+  "lib": ["es2015"],
   "include": ["src/**/*"]
 }

@@ -1,10 +1,10 @@
 {
   "name": "discord-bot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Discord bot",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "node dist/src/index.js",
     "serve": "npm run build && npm run start",
     "build": "tsc",
     "deploy": "git push heroku master"
@@ -13,14 +13,15 @@
   "license": "ISC",
   "devDependencies": {
     "@types/cron": "^1.7.2",
-    "@types/node": "^14.14.21",
+    "@types/node": "^16.11.9",
     "@types/ws": "^7.4.0",
     "typescript": "^4.1.3"
   },
   "dependencies": {
     "cron": "^1.8.2",
-    "discord.js": "^12.5.1",
+    "discord.js": "^13.3.1",
     "dotenv": "^8.2.0",
-    "firebase": "^8.2.3"
+    "firebase": "^8.2.3",
+    "reflect-metadata": "^0.1.13"
   }
 }

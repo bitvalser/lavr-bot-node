@@ -1,28 +1,36 @@
 import * as Discord from 'discord.js';
 import { splitFields } from '../helpers/split-fields';
-import { getStatByName, getStats } from '../services/stats.service';
-import { ControllerBase } from './controller.base';
+import { StatsService } from '../services/stats.service';
+import { ControllerBase } from '../classes/controller-base.class';
+import { Controller } from '../decorators/controller.decorator';
+import { Channels } from '../constants/channels.constants';
 
+@Controller({
+  commands: ['статистика'],
+  channelWhitelist: [Channels.Bot],
+})
 export class StatsController extends ControllerBase {
-  public processMessage(): void {
+  private statsService: StatsService = StatsService.getInstance();
+
+  public processCommand(): void {
     const charName = this.args[0];
     switch (charName) {
       case 'список':
-        this.message.channel.startTyping();
-        getStats().then((stats) => {
-          this.message.channel.stopTyping();
+        this.message.channel.sendTyping();
+        this.statsService.getStats().then((stats) => {
           const rich = new Discord.MessageEmbed().setTitle('Список доступных характеристик').setDescription(
             Object.entries(stats)
               .map(([name, { description }]: any) => `- **${name}** - ${description}`)
               .join('\n')
           );
-          this.message.reply(rich);
+          this.message.reply({
+            embeds: [rich],
+          });
         });
         break;
       default:
-        this.message.channel.startTyping();
-        getStatByName(charName).then((stat) => {
-          this.message.channel.stopTyping();
+        this.message.channel.sendTyping();
+        this.statsService.getStatByName(charName).then((stat) => {
           if (!stat) {
             this.message.reply(`Характеристка с названием ${charName} не найден.`);
             return;
@@ -45,7 +53,9 @@ export class StatsController extends ControllerBase {
             .setTitle(stat.name)
             .addFields(...splitFields(fields))
             .setColor(stat.color);
-          this.message.reply(rich);
+          this.message.reply({
+            embeds: [rich],
+          });
         });
     }
   }
