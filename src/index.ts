@@ -7,12 +7,10 @@ import { HelpController } from './controllers/help.controller';
 import { LevelController } from './controllers/level.controller';
 import { StatsController } from './controllers/stats.controller';
 import firebase from 'firebase';
-import { CronJob } from 'cron';
 import { GifsController } from './controllers/gifs.controller';
 import { ChannelRole } from './constants/channel-role.constants';
 import { ControllerProcessor } from './classes/controllers-processor.class';
 import { WhenChapterController } from './controllers/when-chapter.conroller';
-import { Channels } from './constants/channels.constants';
 import { ArtsController } from './controllers/arts.controller';
 
 firebase.initializeApp({
@@ -35,6 +33,7 @@ export const client = new Discord.Client({
     Discord.Intents.FLAGS.DIRECT_MESSAGES,
     Discord.Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
     Discord.Intents.FLAGS.GUILD_MESSAGE_TYPING,
+    Discord.Intents.FLAGS.GUILD_MEMBERS,
     Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
     Discord.Intents.FLAGS.DIRECT_MESSAGE_TYPING,
   ],
