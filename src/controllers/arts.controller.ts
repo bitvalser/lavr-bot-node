@@ -19,7 +19,6 @@ export class ArtsController extends ControllerBase {
           );
           if (attachments.length > 0) {
             this.message.channel.sendTyping();
-            console.log(attachments.map((item) => item.url));
             artChannel
               .send({
                 embeds: [

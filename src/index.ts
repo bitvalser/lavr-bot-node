@@ -12,6 +12,8 @@ import { ChannelRole } from './constants/channel-role.constants';
 import { ControllerProcessor } from './classes/controllers-processor.class';
 import { WhenChapterController } from './controllers/when-chapter.conroller';
 import { ArtsController } from './controllers/arts.controller';
+import { TestsController } from './controllers/tests.controller';
+import { TestsResultsController } from './controllers/tests-results.controller';
 
 firebase.initializeApp({
   apiKey: 'AIzaSyBCwD-z0MAvT2Jk4KxThNAFT4F62wpkA_0',
@@ -41,6 +43,10 @@ export const client = new Discord.Client({
 });
 export const IS_PROD = JSON.parse(process.env.PROD || 'false');
 const BOT_VERSION = packageJson.version;
+const TEST_TOP_GUILD_ID = '757297356394987581';
+const TEST_TOP_CHANNEL_ID = '836613708146671666';
+const TEST_TOP_MESSAGE_ID = '934536578334883971';
+const TEST_TOP_ID = 't4JAPIM64aPbOtgukEIK';
 console.log(`Bot prod -> ${IS_PROD} (${BOT_VERSION})`);
 client.login(process.env.BOT_TOKEN);
 firebase
@@ -52,6 +58,13 @@ firebase
 
 client.on('ready', () => {
   console.log(`Logged in as ${client?.user?.tag}!`);
+  client.guilds
+    .fetch(TEST_TOP_GUILD_ID)
+    .then((guild) => guild.channels.fetch(TEST_TOP_CHANNEL_ID))
+    .then((channel) => (channel as Discord.TextChannel).messages.fetch(TEST_TOP_MESSAGE_ID))
+    .then((message) => {
+      TestsResultsController.handleRefreshRating(message, TEST_TOP_ID);
+    });
 });
 
 client.on('guildMemberAdd', (member) => {
@@ -69,6 +82,8 @@ const rootCommandProcessor = new ControllerProcessor([
   StatsController,
   WhenChapterController,
   ArtsController,
+  TestsController,
+  TestsResultsController,
 ]);
 
 client.on('message', (message) => {
