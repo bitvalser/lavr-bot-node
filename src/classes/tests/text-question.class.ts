@@ -6,14 +6,14 @@ export class TextQuestion extends TestQuestion {
 
   private getContent(): { embeds?: Discord.MessageEmbed[]; content?: string } {
     const message = new Discord.MessageEmbed()
-      .setTitle('Текстовый вопрос')
-      .setDescription(this.text)
+      .setTitle(`${this.index + 1} - Текстовый вопрос`)
+      .setDescription(this.text.replace(/;\s/g, '\n'))
       .setFooter('Для ответа на вопрос введите сообщение в чат');
     if (this.image) {
       message.setImage(this.image);
     }
     if (this.selectedAnswer) {
-      message.setAuthor(`Ваш ответ -  ${this.selectedAnswer.substring(0, 40)}`);
+      message.setAuthor(`Ваш ответ - ${this.selectedAnswer.substring(0, 40)}`);
     }
     return {
       embeds: [message],
@@ -25,11 +25,12 @@ export class TextQuestion extends TestQuestion {
   }
 
   protected processQuestion(): Promise<string[]> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       this.channel.send(this.getContent()).then((questionMessage) => {
         this.channel
           .awaitMessages({
             max: 1,
+            time: 3 * 60 * 1000,
             filter: (message) => !message.author.bot,
           })
           .then((collected) => {
@@ -37,6 +38,9 @@ export class TextQuestion extends TestQuestion {
             this.selectedAnswer = message.content.trim();
             questionMessage.edit(this.getContent());
             resolve([this.selectedAnswer]);
+          })
+          .catch(() => {
+            reject();
           });
       });
     });

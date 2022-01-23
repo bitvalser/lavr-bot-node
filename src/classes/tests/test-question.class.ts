@@ -4,6 +4,7 @@ import { ITestAnswer } from '../../interfaces/test-answer.interfface';
 export abstract class TestQuestion {
   protected channel: Discord.TextBasedChannels;
   protected text: string;
+  protected index: number;
   protected image: string;
   protected answers: string[];
   protected rightAnswers: string[];
@@ -12,6 +13,7 @@ export abstract class TestQuestion {
   public constructor(
     channel: Discord.TextBasedChannels,
     data: { text: string; answers?: string[]; rightAnswers: string[]; image?: string },
+    index: number,
     userAnswers: string[] = null
   ) {
     this.channel = channel;
@@ -20,6 +22,7 @@ export abstract class TestQuestion {
     this.answers = data.answers || [];
     this.rightAnswers = data.rightAnswers;
     this.userAnswers = userAnswers;
+    this.index = index;
   }
 
   protected abstract processQuestion(): Promise<string[]>;

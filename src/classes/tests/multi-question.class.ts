@@ -8,8 +8,8 @@ export class MultiQuestion extends TestQuestion {
 
   private getContent(): { embed?: Discord.MessageEmbed; content?: string } {
     const message = new Discord.MessageEmbed()
-      .setTitle('Вопрос с несколькими вариантами ответа')
-      .setDescription(this.text)
+      .setTitle(`${this.index + 1} - Вопрос с несколькими вариантами ответа`)
+      .setDescription(this.text.replace(/;\s/g, '\n'))
       .setFields(
         this.answers.map((text, i) => ({
           inline: true,
@@ -26,8 +26,15 @@ export class MultiQuestion extends TestQuestion {
     };
   }
 
+  protected calculateCorrectFactory(answers: string[]): number {
+    const rightAnswersCount = this.rightAnswers.filter((rightAnswer, i) => +rightAnswer === +answers[i]).length;
+    const errorCheck = answers.length - rightAnswersCount;
+    const totalPoints = rightAnswersCount - errorCheck;
+    return totalPoints >= 0 ? totalPoints / this.rightAnswers.length : 0;
+  }
+
   protected processQuestion(): Promise<string[]> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const selector = new MessageSelector(this.channel);
       selector.onSelect((answer) => {
         if (this.selectedAnswers.includes(answer)) {
@@ -42,6 +49,10 @@ export class MultiQuestion extends TestQuestion {
           selector.reset();
           resolve(this.selectedAnswers.map((item) => item.toString()));
         }
+      });
+      selector.onEnd(() => {
+        selector.reset();
+        reject();
       });
       selector.runSelector(this.getContent(), {
         itemsSize: this.answers.length,

@@ -15,6 +15,7 @@ export class TestsService {
     return firebase
       .firestore()
       .collection('tests')
+      .where('dev', '!=', true)
       .get()
       .then((result) =>
         result.docs.map((val) => ({
@@ -38,6 +39,7 @@ export class TestsService {
       .firestore()
       .collection('tests')
       .where('title', '==', name)
+      .where('dev', '!=', true)
       .get()
       .then((result) => {
         const val = result.docs?.[0];
@@ -119,6 +121,7 @@ export class TestsService {
       name: userName,
       answers,
       points,
+      date: new Date(),
     });
   }
 }

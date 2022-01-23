@@ -29,6 +29,8 @@ if (!process.env.PROD) {
 }
 
 export const client = new Discord.Client({
+  // restTimeOffset: 0,
+  // shards: 'auto',
   intents: [
     Discord.Intents.FLAGS.GUILDS,
     Discord.Intents.FLAGS.GUILD_MESSAGES,
@@ -46,7 +48,7 @@ const BOT_VERSION = packageJson.version;
 const TEST_TOP_GUILD_ID = '757297356394987581';
 const TEST_TOP_CHANNEL_ID = '836613708146671666';
 const TEST_TOP_MESSAGE_ID = '934536578334883971';
-const TEST_TOP_ID = 't4JAPIM64aPbOtgukEIK';
+const TEST_TOP_ID = 'dfAZVeolHC0jSNA8drdp';
 console.log(`Bot prod -> ${IS_PROD} (${BOT_VERSION})`);
 client.login(process.env.BOT_TOKEN);
 firebase

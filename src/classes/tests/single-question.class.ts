@@ -7,8 +7,8 @@ export class SingleQuestion extends TestQuestion {
 
   private getContent(): { embed?: Discord.MessageEmbed; content?: string } {
     const message = new Discord.MessageEmbed()
-      .setTitle('Вопрос с одним вариантом ответа')
-      .setDescription(this.text)
+      .setTitle(`${this.index + 1} - Вопрос с одним вариантом ответа`)
+      .setDescription(this.text.replace(/;\s/g, '\n'))
       .setFields(
         this.answers.map((text, i) => ({
           inline: true,
@@ -26,7 +26,7 @@ export class SingleQuestion extends TestQuestion {
   }
 
   protected processQuestion(): Promise<string[]> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const selector = new MessageSelector(this.channel);
       selector.onSelect((answer) => {
         this.selectedAnswer = answer;
@@ -37,6 +37,10 @@ export class SingleQuestion extends TestQuestion {
           selector.reset();
           resolve([this.selectedAnswer.toString()]);
         }
+      });
+      selector.onEnd(() => {
+        selector.reset();
+        reject();
       });
       selector.runSelector(this.getContent(), {
         itemsSize: this.answers.length,

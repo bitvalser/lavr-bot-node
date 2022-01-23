@@ -10,6 +10,7 @@ export class MessageSelector {
   private message: Discord.Message = null;
   private collector: Discord.ReactionCollector;
   private _onConfirm: () => void;
+  private _onEnd: () => void;
   private _onSelect: (option: number) => void;
 
   constructor(channel: Discord.TextBasedChannels, timeout: number = DEFAULT_TIMEOUT) {
@@ -23,6 +24,10 @@ export class MessageSelector {
 
   public onConfirm(callback: () => void): void {
     this._onConfirm = callback;
+  }
+
+  public onEnd(callback: () => void): void {
+    this._onEnd = callback;
   }
 
   public updateMessage({
@@ -57,6 +62,7 @@ export class MessageSelector {
           this._onSelect(MessageSelector.SELECT_ITEMS.indexOf(data.emoji.name));
         }
       };
+      this.collector.on('end', this._onEnd);
       this.collector.on('collect', onReaction);
       this.collector.on('remove', onReaction);
       Array.from({ length: itemsSize })
