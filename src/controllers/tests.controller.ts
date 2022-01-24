@@ -5,6 +5,7 @@ import { TestSession } from '../classes/tests/test-session.class';
 import { ChannelRole } from '../constants/channel-role.constants';
 import { Controller } from '../decorators/controller.decorator';
 import { getTestAnswer } from '../helpers/get-test-answer';
+import { shuffle } from '../helpers/shuffle-array';
 import { splitEmbedsChunks } from '../helpers/split-embeds';
 import { TestsService } from '../services/test.service';
 
@@ -42,6 +43,7 @@ export class TestsController extends ControllerBase {
                 result.answers.map((answer, i) => ({
                   inline: false,
                   name: `${questions[i].text}\t${((correctFactor) => {
+                    if (questions[i].value === 0) return '✅';
                     if (correctFactor === 1) return '✅';
                     else if (correctFactor === 0) return '❌';
                     else return '❎';
@@ -51,7 +53,6 @@ export class TestsController extends ControllerBase {
                   }`,
                 }))
               ).map((data) => {
-                console.log(data);
                 this.message.channel.send({
                   embeds: data,
                 });
@@ -79,10 +80,10 @@ export class TestsController extends ControllerBase {
           .fetch(MAIN_GUILD_ID)
           .then((guild) => guild.members.fetch(this.message.author.id))
           .then((member) => {
-            if (member && member.roles.cache.some((role) => role.id === ChannelRole.StrongReader)) {
-              this.message.reply('Ты слишком хорош для этого теста :)');
-              return;
-            }
+            // if (member && member.roles.cache.some((role) => role.id === ChannelRole.StrongReader)) {
+            //   this.message.reply('Ты слишком хорош для этого теста :)');
+            //   return;
+            // }
             this.message.channel.sendTyping();
             this.testsService
               .getTestByName(testName)
@@ -122,18 +123,22 @@ export class TestsController extends ControllerBase {
                             points
                           )
                           .then(() => this.showTestResult(test.id));
+                      } else {
+                        this.testsService
+                          .saveTestResult(test.id, this.message.author.id, this.message.author.username, [], 0)
+                          .then(() => this.showTestResult(test.id));
                       }
                     });
                   });
                   startSession.onEnd(() => {
-                    this.message.reply('Вы не успели подтвердить начало теста :(');
+                    this.message.reply('Вы не успели подтвердить начало теста, попробуйте ещё раз :(');
                   });
                   startSession.runSelector(
                     {
                       embed: new Discord.MessageEmbed()
                         .setTitle(test.title)
                         .setDescription(
-                          `${test.description}\n\nНа каждый вопрос у вас есть 3 минуты чтобы ответить, если вы не успеете ответить то тест закроется и вам придётся начинать его сначала!!!\n*(У вас есть 45 секунд чтобы начать тест)*`
+                          `${test.description}\n\nНа каждый вопрос у вас есть 3 минуты чтобы ответить, если вы не успеете ответить то тест закроется и вам будет засчитана провальная попытка!!!\n*(У вас есть 45 секунд чтобы начать тест)*`
                         )
                         .setFields([
                           {
@@ -144,7 +149,7 @@ export class TestsController extends ControllerBase {
                           {
                             inline: true,
                             name: 'Примерная длительность',
-                            value: `${test.time} мин.`
+                            value: `${test.time} мин.`,
                           },
                         ])
                         .setFooter(`${MessageSelector.OK_ITEM} Начать тест?`),

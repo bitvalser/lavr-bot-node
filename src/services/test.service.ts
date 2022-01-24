@@ -1,4 +1,5 @@
 import firebase from 'firebase';
+import { IS_PROD } from '..';
 import { ITestAnswer } from '../interfaces/test-answer.interfface';
 
 export class TestsService {
@@ -12,17 +13,16 @@ export class TestsService {
   }
 
   public getTests(): Promise<any> {
-    return firebase
-      .firestore()
-      .collection('tests')
-      .where('dev', '!=', true)
-      .get()
-      .then((result) =>
-        result.docs.map((val) => ({
-          id: val.id,
-          ...val.data(),
-        }))
-      );
+    const testsRef = firebase.firestore().collection('tests');
+    if (IS_PROD) {
+      testsRef.where('dev', '!=', true);
+    }
+    return testsRef.get().then((result) =>
+      result.docs.map((val) => ({
+        id: val.id,
+        ...val.data(),
+      }))
+    );
   }
 
   public getTestById(id: string): Promise<any> {
@@ -35,22 +35,20 @@ export class TestsService {
   }
 
   public getTestByName(name: string): Promise<any> {
-    return firebase
-      .firestore()
-      .collection('tests')
-      .where('title', '==', name)
-      .where('dev', '!=', true)
-      .get()
-      .then((result) => {
-        const val = result.docs?.[0];
-        if (val) {
-          return {
-            id: val.id,
-            ...val.data(),
-          };
-        }
-        return null;
-      });
+    const testRef = firebase.firestore().collection('tests').where('title', '==', name);
+    if (IS_PROD) {
+      testRef.where('dev', '!=', true);
+    }
+    return testRef.get().then((result) => {
+      const val = result.docs?.[0];
+      if (val) {
+        return {
+          id: val.id,
+          ...val.data(),
+        };
+      }
+      return null;
+    });
   }
 
   public getTestRating(id: string): Promise<any> {
