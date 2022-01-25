@@ -45,9 +45,9 @@ export const client = new Discord.Client({
 });
 export const IS_PROD = JSON.parse(process.env.PROD || 'false');
 const BOT_VERSION = packageJson.version;
-const TEST_TOP_GUILD_ID = '757297356394987581';
-const TEST_TOP_CHANNEL_ID = '836613708146671666';
-const TEST_TOP_MESSAGE_ID = '934536578334883971';
+const TEST_TOP_GUILD_ID = '699101364512489575';
+const TEST_TOP_CHANNEL_ID = '800660959877922816';
+const TEST_TOP_MESSAGE_ID = '935525895152750614';
 const TEST_TOP_ID = 'vtDJNRyPQDAbilszXgxf';
 console.log(`Bot prod -> ${IS_PROD} (${BOT_VERSION})`);
 client.login(process.env.BOT_TOKEN);

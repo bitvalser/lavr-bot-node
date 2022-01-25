@@ -5,7 +5,6 @@ import { TestSession } from '../classes/tests/test-session.class';
 import { ChannelRole } from '../constants/channel-role.constants';
 import { Controller } from '../decorators/controller.decorator';
 import { getTestAnswer } from '../helpers/get-test-answer';
-import { shuffle } from '../helpers/shuffle-array';
 import { splitEmbedsChunks } from '../helpers/split-embeds';
 import { TestsService } from '../services/test.service';
 
@@ -80,10 +79,10 @@ export class TestsController extends ControllerBase {
           .fetch(MAIN_GUILD_ID)
           .then((guild) => guild.members.fetch(this.message.author.id))
           .then((member) => {
-            // if (member && member.roles.cache.some((role) => role.id === ChannelRole.StrongReader)) {
-            //   this.message.reply('Ты слишком хорош для этого теста :)');
-            //   return;
-            // }
+            if (member && member.roles.cache.some((role) => role.id === ChannelRole.StrongReader)) {
+              this.message.reply('Ты слишком хорош для этого теста :)');
+              return;
+            }
             this.message.channel.sendTyping();
             this.testsService
               .getTestByName(testName)

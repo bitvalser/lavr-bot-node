@@ -1,6 +1,6 @@
 import * as Discord from 'discord.js';
 
-const DEFAULT_TIMEOUT = 20 * 1000;
+const DEFAULT_TIMEOUT = 3 * 60 * 1000;
 
 export class MessageSelector {
   public static SELECT_ITEMS = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];

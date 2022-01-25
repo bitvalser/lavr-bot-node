@@ -30,7 +30,7 @@ export class TextQuestion extends TestQuestion {
         this.channel
           .awaitMessages({
             max: 1,
-            time: 20 * 1000,
+            time: 3 * 60 * 1000,
             filter: (message) => !message.author.bot,
           })
           .then((collected) => {
