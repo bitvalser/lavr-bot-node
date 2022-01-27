@@ -35,20 +35,22 @@ export class TestsResultsController extends ControllerBase {
                   ...doc.data(),
                 } as any)
             );
-            message.edit({
-              embeds: [
-                new Discord.MessageEmbed()
-                  .setTitle(`Рейтинг теста "${test.title}" (Топ 10)`)
-                  .setDescription(test.description)
-                  .setFields(
-                    data.map((user, i) => ({
-                      inline: false,
-                      name: `${i + 1} место ${RATING_MEDALS[i] || ''}`,
-                      value: `<@${user.id}> ${user.points} очков`,
-                    }))
-                  ),
-              ],
-            });
+            message.suppressEmbeds(false).then(() =>
+              message.edit({
+                embeds: [
+                  new Discord.MessageEmbed()
+                    .setTitle(`Рейтинг теста "${test.title}" (Топ 10)`)
+                    .setDescription(test.description)
+                    .setFields(
+                      data.map((user, i) => ({
+                        inline: false,
+                        name: `${i + 1} место ${RATING_MEDALS[i] || ''}`,
+                        value: `<@${user.id}> ${user.points} очков`,
+                      }))
+                    ),
+                ],
+              })
+            );
           });
       });
   }
@@ -81,10 +83,10 @@ export class TestsResultsController extends ControllerBase {
               this.message.reply({
                 embeds: [
                   new Discord.MessageEmbed()
-                    .setTitle(`Рейтинг теста "${data.title}" (Топ 30)`)
+                    .setTitle(`Рейтинг теста "${data.title}" (Топ 25)`)
                     .setDescription(data.description)
                     .setFields(
-                      users.slice(0, 30).map((user, i) => ({
+                      users.slice(0, 25).map((user, i) => ({
                         inline: false,
                         name: `${i + 1} место ${RATING_MEDALS[i] || ''}`,
                         value: `<@${user.id}> ${user.points} очков`,

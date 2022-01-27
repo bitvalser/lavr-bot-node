@@ -27,7 +27,7 @@ export class MultiQuestion extends TestQuestion {
   }
 
   protected calculateCorrectFactory(answers: string[]): number {
-    const rightAnswersCount = this.rightAnswers.filter((rightAnswer, i) => +rightAnswer === +answers[i]).length;
+    const rightAnswersCount = answers.filter((answer) => this.rightAnswers.includes(answer)).length;
     const errorCheck = answers.length - rightAnswersCount;
     const totalPoints = rightAnswersCount - errorCheck;
     return totalPoints >= 0 ? totalPoints / this.rightAnswers.length : 0;

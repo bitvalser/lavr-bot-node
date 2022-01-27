@@ -13,9 +13,9 @@ export class TestsService {
   }
 
   public getTests(): Promise<any> {
-    const testsRef = firebase.firestore().collection('tests');
+    let testsRef: any = firebase.firestore().collection('tests');
     if (IS_PROD) {
-      testsRef.where('dev', '!=', true);
+      testsRef = testsRef.where('dev', '!=', true);
     }
     return testsRef.get().then((result) =>
       result.docs.map((val) => ({
@@ -35,9 +35,9 @@ export class TestsService {
   }
 
   public getTestByName(name: string): Promise<any> {
-    const testRef = firebase.firestore().collection('tests').where('title', '==', name);
+    let testRef: any = firebase.firestore().collection('tests').where('title', '==', name);
     if (IS_PROD) {
-      testRef.where('dev', '!=', true);
+      testRef = testRef.where('dev', '!=', true);
     }
     return testRef.get().then((result) => {
       const val = result.docs?.[0];
