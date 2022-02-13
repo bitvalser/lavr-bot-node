@@ -38,7 +38,7 @@ export class ControllerProcessor {
         onlyGuild === false || Boolean(message.guild),
       ];
       if (onlyDM === true && message.guild) {
-        message.reply({ content: 'Это команда работает только в личных сообщених!' });
+        message.reply({ content: 'Эти команды работают только в личных сообщениях!' });
       }
       if (rules.every(Boolean)) {
         new Controller(message, args).processCommand();

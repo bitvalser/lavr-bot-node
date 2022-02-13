@@ -28,13 +28,15 @@ export class TestsResultsController extends ControllerBase {
           .orderBy('points', 'desc')
           .limit(10)
           .onSnapshot((snapshot) => {
-            const data = snapshot.docs.map(
-              (doc) =>
-                ({
-                  id: doc.id,
-                  ...doc.data(),
-                } as any)
-            );
+            const data = snapshot.docs
+              .map(
+                (doc) =>
+                  ({
+                    id: doc.id,
+                    ...doc.data(),
+                  } as any)
+              )
+              .sort((a, b) => (b.points === a.points ? +a.date - +b.date : 0));
             message.suppressEmbeds(false).then(() =>
               message.edit({
                 embeds: [
@@ -45,7 +47,9 @@ export class TestsResultsController extends ControllerBase {
                       data.map((user, i) => ({
                         inline: false,
                         name: `${i + 1} место ${RATING_MEDALS[i] || ''}`,
-                        value: `<@${user.id}> ${user.points} очков`,
+                        value: `**${user.name}** ${user.points} очков ${
+                          user.attempts ? `(${user.attempts} попыток)` : ''
+                        }`,
                       }))
                     ),
                 ],
@@ -89,7 +93,9 @@ export class TestsResultsController extends ControllerBase {
                       users.slice(0, 25).map((user, i) => ({
                         inline: false,
                         name: `${i + 1} место ${RATING_MEDALS[i] || ''}`,
-                        value: `<@${user.id}> ${user.points} очков`,
+                        value: `**${user.name}** ${user.points} очков ${
+                          user.attempts ? `(${user.attempts} попыток)` : ''
+                        }`,
                       }))
                     ),
                   ...(yourPosition >= 0

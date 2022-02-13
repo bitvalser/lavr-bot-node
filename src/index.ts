@@ -1,7 +1,9 @@
 import 'reflect-metadata';
 import * as dotenv from 'dotenv';
+import EventEmitter from 'events';
 import packageJson from '../package.json';
 import * as Discord from 'discord.js';
+import { createClient } from 'redis';
 import { CharacterController } from './controllers/character.controller';
 import { HelpController } from './controllers/help.controller';
 import { LevelController } from './controllers/level.controller';
@@ -43,12 +45,13 @@ export const client = new Discord.Client({
   ],
   partials: ['CHANNEL', 'REACTION', 'MESSAGE'],
 });
+export const redis = createClient({
+  url: process.env.REDIS_URL,
+});
+redis.connect();
+export const emitter = new EventEmitter();
 export const IS_PROD = JSON.parse(process.env.PROD || 'false');
 const BOT_VERSION = packageJson.version;
-const TEST_TOP_GUILD_ID = '699101364512489575';
-const TEST_TOP_CHANNEL_ID = '800660959877922816';
-const TEST_TOP_MESSAGE_ID = '935554445658435704';
-const TEST_TOP_ID = 'vtDJNRyPQDAbilszXgxf';
 console.log(`Bot prod -> ${IS_PROD} (${BOT_VERSION})`);
 client.login(process.env.BOT_TOKEN);
 firebase
@@ -60,13 +63,6 @@ firebase
 
 client.on('ready', () => {
   console.log(`Logged in as ${client?.user?.tag}!`);
-  client.guilds
-    .fetch(TEST_TOP_GUILD_ID)
-    .then((guild) => guild.channels.fetch(TEST_TOP_CHANNEL_ID))
-    .then((channel) => (channel as Discord.TextChannel).messages.fetch(TEST_TOP_MESSAGE_ID))
-    .then((message) => {
-      TestsResultsController.handleRefreshRating(message, TEST_TOP_ID);
-    });
 });
 
 client.on('guildMemberAdd', (member) => {
@@ -88,7 +84,7 @@ const rootCommandProcessor = new ControllerProcessor([
   TestsResultsController,
 ]);
 
-client.on('message', (message) => {
+client.on('messageCreate', (message) => {
   console.log(message.content);
   if (message.content.startsWith('!') && !message.author.bot) {
     rootCommandProcessor.processMessage(message);

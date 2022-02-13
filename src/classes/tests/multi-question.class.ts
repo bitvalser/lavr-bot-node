@@ -5,6 +5,7 @@ import { MessageSelector } from '../message-selector.class';
 export class MultiQuestion extends TestQuestion {
   private selectedAnswers: number[] =
     this.userAnswers && this.userAnswers.length > 0 ? this.userAnswers.map((item) => +item) : [];
+  private selector: MessageSelector;
 
   private getContent(): { embed?: Discord.MessageEmbed; content?: string } {
     const message = new Discord.MessageEmbed()
@@ -33,28 +34,32 @@ export class MultiQuestion extends TestQuestion {
     return totalPoints >= 0 ? totalPoints / this.rightAnswers.length : 0;
   }
 
+  public stop(): void {
+    this.selector.reset();
+  }
+
   protected processQuestion(): Promise<string[]> {
     return new Promise((resolve, reject) => {
-      const selector = new MessageSelector(this.channel);
-      selector.onSelect((answer) => {
+      this.selector = new MessageSelector(this.channel);
+      this.selector.onSelect((answer) => {
         if (this.selectedAnswers.includes(answer)) {
           this.selectedAnswers = this.selectedAnswers.filter((el) => el !== answer);
         } else {
           this.selectedAnswers.push(answer);
         }
-        selector.updateMessage(this.getContent());
+        this.selector.updateMessage(this.getContent());
       });
-      selector.onConfirm(() => {
+      this.selector.onConfirm(() => {
         if (this.selectedAnswers.length > 0) {
-          selector.reset();
+          this.selector.reset();
           resolve(this.selectedAnswers.map((item) => item.toString()));
         }
       });
-      selector.onEnd(() => {
-        selector.reset();
+      this.selector.onEnd(() => {
+        this.selector.reset();
         reject();
       });
-      selector.runSelector(this.getContent(), {
+      this.selector.runSelector(this.getContent(), {
         itemsSize: this.answers.length,
         withOk: true,
       });

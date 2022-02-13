@@ -27,6 +27,8 @@ export abstract class TestQuestion {
 
   protected abstract processQuestion(): Promise<string[]>;
 
+  public abstract stop(): void;
+
   protected calculateCorrectFactory(answers: string[]): number {
     return this.rightAnswers.filter((rightAnswer, i) => +rightAnswer === +answers[i]).length / this.rightAnswers.length;
   }

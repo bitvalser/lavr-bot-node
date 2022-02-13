@@ -5,4 +5,5 @@ export interface ITestQuestion {
   comment?: string;
   rightAnswers: string[];
   text: string;
+  value: number;
 }

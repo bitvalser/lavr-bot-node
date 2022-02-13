@@ -60,10 +60,12 @@ export class TestsService {
       .orderBy('points', 'desc')
       .get()
       .then((result) =>
-        result.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
+        result.docs
+          .map((doc): any => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .sort((a, b) => (b.points === a.points ? +a.date - +b.date : 0))
       );
   }
 
@@ -115,11 +117,33 @@ export class TestsService {
     answers: ITestAnswer[],
     points: number
   ): Promise<any> {
-    return firebase.firestore().collection('tests').doc(testId).collection('results').doc(userId).set({
-      name: userName,
-      answers,
-      points,
-      date: new Date(),
-    });
+    return firebase
+      .firestore()
+      .collection('tests')
+      .doc(testId)
+      .collection('results')
+      .doc(userId)
+      .set(
+        {
+          name: userName,
+          answers,
+          points,
+          date: new Date(),
+          attempts: firebase.firestore.FieldValue.increment(1),
+        },
+        { merge: true }
+      );
+  }
+
+  public updateTestResultAttempt(testId: string, userId: string): Promise<any> {
+    return firebase
+      .firestore()
+      .collection('tests')
+      .doc(testId)
+      .collection('results')
+      .doc(userId)
+      .update({
+        attempts: firebase.firestore.FieldValue.increment(1),
+      });
   }
 }

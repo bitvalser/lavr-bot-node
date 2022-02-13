@@ -1,5 +1,4 @@
 import * as Discord from 'discord.js';
-import { getTestAnswer } from '../../helpers/get-test-answer';
 import { ITestAnswer } from '../../interfaces/test-answer.interfface';
 import { ITestQuestion } from '../../interfaces/test-question.interface';
 import { MessageSelector } from '../message-selector.class';
@@ -12,27 +11,32 @@ export class TestSession {
   private channel: Discord.TextBasedChannels;
   private questions: ITestQuestion[];
   private answers: ITestAnswer[];
+  private activeQuestion: TestQuestion;
+  private missedSelector: MessageSelector;
+  private endSelector: MessageSelector;
   private _onEnd: (data: ITestAnswer[]) => void;
+  private _onError: () => void;
+  private _onUpdate: (data: ITestAnswer[]) => void;
 
-  public constructor(channel: Discord.TextBasedChannels, questions: ITestQuestion[]) {
+  public constructor(channel: Discord.TextBasedChannels, questions: ITestQuestion[], answers?: ITestAnswer[]) {
     this.channel = channel;
     this.questions = questions;
-    this.answers = Array.from({ length: questions.length }).map(() => null);
+    this.answers = Array.from({ length: questions.length }).map((_, i) => answers[i] || null);
   }
 
   public showQuestion(index: number): void {
     if (index <= this.questions.length) {
       if (this.answers.filter((item) => item !== null).length === this.questions.length) {
-        const endSelector = new MessageSelector(this.channel, 5 * 60 * 1000);
-        endSelector.onConfirm(() => {
-          endSelector.reset();
+        this.endSelector = new MessageSelector(this.channel, 5 * 60 * 1000);
+        this.endSelector.onConfirm(() => {
+          this.endSelector.reset();
           this._onEnd(this.answers);
         });
-        endSelector.onEnd(() => {
-          endSelector.reset();
+        this.endSelector.onEnd(() => {
+          this.endSelector.reset();
           this._onEnd(this.answers);
         });
-        endSelector.runSelector(
+        this.endSelector.runSelector(
           {
             embed: new Discord.MessageEmbed()
               .setTitle('Завершение теста')
@@ -45,7 +49,7 @@ export class TestSession {
         );
       } else {
         const questionData = this.questions[index];
-        const question = ((): TestQuestion => {
+        this.activeQuestion = ((): TestQuestion => {
           switch (questionData.type) {
             case 'single':
               return new SingleQuestion(this.channel, questionData, index, this.answers[index]?.answers || null);
@@ -55,24 +59,27 @@ export class TestSession {
               return new TextQuestion(this.channel, questionData, index, this.answers[index]?.answers || null);
           }
         })();
-        question
+        this.activeQuestion
           .start()
           .then((answer) => {
             this.answers[index] = answer;
+            if (this._onUpdate) {
+              this._onUpdate(this.answers);
+            }
             this.showQuestion(index + 1);
           })
           .catch(() => {
             this.answers[index] = { answers: [], correctFactor: 0 };
-            const missedSelector = new MessageSelector(this.channel, 60 * 1000);
-            missedSelector.onConfirm(() => {
-              missedSelector.reset();
+            this.missedSelector = new MessageSelector(this.channel, 60 * 1000);
+            this.missedSelector.onConfirm(() => {
+              this.missedSelector.reset();
               this.showQuestion(index + 1);
             });
-            missedSelector.onEnd(() => {
-              missedSelector.reset();
+            this.missedSelector.onEnd(() => {
+              this.missedSelector.reset();
               this._onEnd(null);
             });
-            missedSelector.runSelector(
+            this.missedSelector.runSelector(
               {
                 embed: new Discord.MessageEmbed()
                   .setTitle('Вы не ответили на вопрос')
@@ -88,10 +95,25 @@ export class TestSession {
     }
   }
 
-  public start(): Promise<ITestAnswer[]> {
-    return new Promise((resolve) => {
+  public stop(): void {
+    this.activeQuestion.stop();
+    if (this.missedSelector) {
+      this.missedSelector.reset();
+    }
+    if (this.endSelector) {
+      this.endSelector.reset();
+    }
+    this._onError();
+  }
+
+  public start({ onUpdate }: { onUpdate?: (data: ITestAnswer[]) => void } = {}): Promise<ITestAnswer[]> {
+    return new Promise((resolve, reject) => {
       this._onEnd = resolve;
-      this.showQuestion(0);
+      this._onError = reject;
+      if (onUpdate) {
+        this._onUpdate = onUpdate;
+      }
+      this.showQuestion(this.answers.findIndex((answer) => answer === null));
     });
   }
 }

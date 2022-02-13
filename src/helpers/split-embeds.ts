@@ -6,9 +6,9 @@ const arrayСhunks = (array, chunkSize) =>
     .map((_, index) => index * chunkSize)
     .map((begin) => array.slice(begin, begin + chunkSize));
 
-export const splitEmbedsChunks = (fields) => {
+export const splitEmbedsChunks = (fields, fieldsChunks = 10, chunks = 5) => {
   return arrayСhunks(
-    arrayСhunks(fields, 10).map((data) => new Discord.MessageEmbed().addFields(data)),
-    5
+    arrayСhunks(fields, fieldsChunks).map((data) => new Discord.MessageEmbed().addFields(data)),
+    chunks
   );
 };

@@ -4,6 +4,7 @@ import { MessageSelector } from '../message-selector.class';
 
 export class SingleQuestion extends TestQuestion {
   private selectedAnswer: number = this.userAnswers && this.userAnswers.length > 0 ? +this.userAnswers[0] : null;
+  private selector: MessageSelector;
 
   private getContent(): { embed?: Discord.MessageEmbed; content?: string } {
     const message = new Discord.MessageEmbed()
@@ -25,24 +26,28 @@ export class SingleQuestion extends TestQuestion {
     };
   }
 
+  public stop(): void {
+    this.selector.reset();
+  }
+
   protected processQuestion(): Promise<string[]> {
     return new Promise((resolve, reject) => {
-      const selector = new MessageSelector(this.channel);
-      selector.onSelect((answer) => {
+      this.selector = new MessageSelector(this.channel);
+      this.selector.onSelect((answer) => {
         this.selectedAnswer = answer;
-        selector.updateMessage(this.getContent());
+        this.selector.updateMessage(this.getContent());
       });
-      selector.onConfirm(() => {
+      this.selector.onConfirm(() => {
         if (this.selectedAnswer !== null) {
-          selector.reset();
+          this.selector.reset();
           resolve([this.selectedAnswer.toString()]);
         }
       });
-      selector.onEnd(() => {
-        selector.reset();
+      this.selector.onEnd(() => {
+        this.selector.reset();
         reject();
       });
-      selector.runSelector(this.getContent(), {
+      this.selector.runSelector(this.getContent(), {
         itemsSize: this.answers.length,
         withOk: true,
       });

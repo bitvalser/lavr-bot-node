@@ -69,11 +69,13 @@ export class GifsController extends ControllerBase {
             return;
           }
           const attachment = new Discord.MessageAttachment(gif.url);
-          this.message.reply({
-            content: gif.id,
+          this.message.channel.send({
+            content: `<@${this.message.author.id}>, ${gif.id}`,
             files: [attachment],
           });
-          this.message.delete();
+          if (this.message.deletable) {
+            this.message.delete();
+          }
         });
     }
   }
