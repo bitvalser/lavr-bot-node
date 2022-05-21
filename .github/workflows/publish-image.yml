@@ -39,3 +39,14 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Pull and run Docker image
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            docker pull bitvalser/lavr-bot
+            docker ps -a -q --filter="name=bitvalser/lavr-bot"
+            docker run -d --restart always --network="host" --env-file /home/lavr-bot/.env bitvalser/lavr-bot  
