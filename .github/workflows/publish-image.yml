@@ -1,4 +1,4 @@
-name: Publish Docker image
+name: Publish Docker image and deploy
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
       - master
 
 jobs:     
-  push_to_registry:
-    name: Push Docker image to Docker Hub
+  deploy:
+    name: Publish Docker image and deploy
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
@@ -40,8 +40,10 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Pull and run Docker image
+      - name: Create ssh key
       - run: echo "${{ secrets.SSH_KEY }}" > ssh_key.ppk
+
+      - name: Pull and run Docker image
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
