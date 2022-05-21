@@ -41,11 +41,12 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Pull and run Docker image
+      - run: echo "${{ secrets.SSH_KEY }}" > ssh_key.ppk
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
+          key_path: ssh_key.ppk
           script: |
             docker pull bitvalser/lavr-bot
             docker ps -a -q --filter="name=bitvalser/lavr-bot"
