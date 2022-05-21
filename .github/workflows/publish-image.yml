@@ -40,7 +40,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Create ssh key
       - run: echo "${{ secrets.SSH_KEY }}" > ssh_key.ppk
 
       - name: Pull and run Docker image
