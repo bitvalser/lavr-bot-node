@@ -92,7 +92,9 @@ client.on('messageReactionAdd', (reaction, user) => {
           })
         )
         .then((member) => {
-          member.roles.add(role);
+          if (!member.roles.cache.hasAny(ChannelRole.Reader, ChannelRole.StrongReader)) {
+            member.roles.add(role);
+          }
         });
     }
   }
