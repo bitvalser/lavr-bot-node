@@ -16,6 +16,7 @@ import { WhenChapterController } from './controllers/when-chapter.conroller';
 import { ArtsController } from './controllers/arts.controller';
 import { TestsController } from './controllers/tests.controller';
 import { TestsResultsController } from './controllers/tests-results.controller';
+import { Channels } from './constants/channels.constants';
 
 firebase.initializeApp({
   apiKey: 'AIzaSyBCwD-z0MAvT2Jk4KxThNAFT4F62wpkA_0',
@@ -66,9 +67,34 @@ client.on('ready', () => {
 });
 
 client.on('guildMemberAdd', (member) => {
-  const role = member.guild.roles.cache.find((role) => role.id === ChannelRole.Reader);
-  if (role) {
-    member.roles.add(role);
+  const channel = member.guild.channels.cache.get(Channels.Start) as Discord.TextChannel;
+  if (channel) {
+    channel.send(
+      `<@${member.id}>, Приветствуем вас на нашем дискорд канале посвящённый книге "Everything will be my way!". Прежде чем начать ознакомтесь пожалуйста с ${member.guild.rulesChannel} сервера чтобы получить доступ к нему.`
+    );
+  }
+});
+
+const ACCEPT_REACTION = '✅';
+const ACCEPT_RULES_MESSAGE = '1012347996777746452';
+
+client.on('messageReactionAdd', (reaction, user) => {
+  const message = reaction.message;
+  const guild = message.guild;
+  if (message.id === ACCEPT_RULES_MESSAGE && reaction.emoji.name === ACCEPT_REACTION) {
+    const role = guild.roles.cache.find((role) => role.id === ChannelRole.Reader);
+    if (role) {
+      user
+        .fetch()
+        .then((fetchedUser) =>
+          guild.members.fetch({
+            user: fetchedUser,
+          })
+        )
+        .then((member) => {
+          member.roles.add(role);
+        });
+    }
   }
 });
 

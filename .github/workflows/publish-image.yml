@@ -47,6 +47,6 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            docker rm -f $(docker ps -a --filter ancestor="bitvalser/lavr-bot" --format={{.ID}})
             docker pull bitvalser/lavr-bot
-            docker ps -a -q --filter="name=bitvalser/lavr-bot"
             docker run -d --restart always --network="host" --env-file /home/lavr-bot/.env bitvalser/lavr-bot  
