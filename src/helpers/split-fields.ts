@@ -1,4 +1,4 @@
-export const MAX_BODY_LENGTH = 1024;
+export const MAX_BODY_LENGTH = 1000;
 
 export const splitFields = (fields: any) =>
   fields
